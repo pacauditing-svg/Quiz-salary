@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>حالات عملية - ضريبة الرواتب والأجور</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#d0d0d0;font-family:Arial,sans-serif;padding:15px;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+.container{background:white;border-radius:20px;padding:25px;max-width:750px;width:100%;border:1px solid #ccc;box-shadow:0 5px 20px rgba(0,0,0,0.1);}
+.title{font-size:1.8rem;color:#0a2a4a;text-align:center;font-weight:800;}
+.sub{font-size:1.1rem;color:#0a2a4a;text-align:center;margin:5px 0;}
+.preptext{font-size:0.95rem;color:#c62828;text-align:center;margin:8px 0;font-weight:500;}
+.prep{font-size:1rem;color:#0a2a4a;text-align:center;border-top:1px solid #ccc;padding-top:12px;margin:12px 0;}
+.count{font-size:1.3rem;font-weight:700;color:#0a2a4a;text-align:center;margin:12px 0;}
+.disc{background:#fff8e1;padding:12px;border-radius:12px;font-size:0.8rem;color:#555;text-align:center;margin:12px 0;border-right:4px solid #0a2a4a;}
+.startbtn{background:#0a2a4a;color:white;border:none;padding:14px;border-radius:12px;font-size:1.1rem;font-weight:bold;cursor:pointer;display:block;margin:15px auto;width:100%;max-width:280px;}
+.startbtn:active{transform:scale(0.96);}
+.progress{display:flex;justify-content:space-between;margin-bottom:15px;flex-wrap:wrap;gap:8px;}
+.qcounter,.qscore{background:#0a2a4a;color:white;padding:5px 14px;border-radius:12px;font-weight:bold;font-size:0.85rem;}
+.qscore{background:#c62828;}
+.qtext{font-size:1.2rem;font-weight:700;margin:15px 0 20px;color:#0a2a4a;line-height:1.5;text-align:right;}
+.options{list-style:none;padding:0;margin:0 0 15px 0;}
+.opt{background:white;border:1px solid #ccc;border-radius:12px;padding:12px 16px;margin-bottom:10px;cursor:pointer;text-align:right;font-size:0.95rem;color:#333;display:flex;align-items:center;gap:12px;}
+.opt:active{background:#eef2f7;}
+.opt .prefix{background:#cbd5e1;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:bold;flex-shrink:0;}
+.opt.correct{background:#bbf7d0;border-color:#15803d;color:#14532d;}
+.opt.correct .prefix{background:#15803d;color:white;}
+.opt.wrong{background:#ffe4e2;border-color:#b91c1c;color:#7f1a1a;text-decoration:line-through;}
+.opt.wrong .prefix{background:#b91c1c;color:white;}
+.opt.disabled{opacity:0.8;cursor:default;}
+.feedback{border-radius:12px;padding:12px;margin:10px 0;text-align:center;font-size:0.9rem;display:none;}
+.fbgood{background:#dcfce7;color:#166534;display:block;border-right:4px solid #22c55e;}
+.fbbad{background:#fee2e2;color:#991b1b;display:block;border-right:4px solid #ef4444;}
+.actions{display:flex;gap:10px;margin-top:15px;}
+.nav{background:#e0e0e0;border:1px solid #ccc;padding:10px;border-radius:12px;font-size:0.95rem;font-weight:bold;color:#333;cursor:pointer;flex:1;text-align:center;}
+.nav:active{transform:scale(0.96);}
+.next{background:#0a2a4a;color:white;border:none;}
+.submit{background:#c62828;color:white;border:none;}
+.result-title{font-size:1.8rem;color:#0a2a4a;text-align:center;font-weight:800;}
+.final-score{font-size:2.5rem;font-weight:800;color:#0a2a4a;text-align:center;margin:15px 0;}
+.final-msg{font-size:1rem;text-align:center;color:#333;margin-bottom:15px;}
+.btn-restart{background:#0a2a4a;color:white;border:none;padding:12px;border-radius:12px;font-size:1rem;cursor:pointer;display:block;margin:10px auto;width:100%;max-width:250px;}
+.btn-restart:active{transform:scale(0.96);}
+.footer-disc{font-size:0.7rem;color:#888;margin-top:15px;padding:10px;border-top:1px solid #ccc;text-align:center;}
+</style>
+</head>
+<body>
+<div class="container" id="app"></div>
+<script>
+var QUESTIONS = [
+{text:"يعفى من ضريبة الرواتب والأجور:",options:["عمال التنظيفات","عمال الصرف الصحي","القائمون على المساجد والكنائس"],correct:2},
+{text:"يعفى من ضريبة الرواتب والأجور:",options:["عناصر الإطفاء.","رواتب السفراء.","رواتب العسكريين","جميع ماسبق"],correct:3},
+{text:"يخضع لضريبة الرواتب والأجور حسب الشرائح:",options:["تعويض غلاء المعيشة.","التعويض العائلي.","تعويض المسؤولية","جميع ماسبق"],correct:3},
+{text:"لا تخضع المبالغ التالية للضريبة على الرواتب والأجور:",options:["تعويضات التسريح","المكافآت","تعويضات العمل الإضافي."],correct:0},
+{text:"الدخول الخاضعة لإعفاءات من ضريبة الرواتب والأجور:",options:["معاشات التقاعد وتعويضات التسريح.","العاملون في البعثات السورية الخارجية.","المنح التي تصدر عن السيد الرئيس.","جميع ما سبق"],correct:3},
+{text:"الإضافات الواجبة على ضريبة الرواتب والأجور:",options:["10% إدارة محلية.","10% إعادة اعمار.","جميع ما سبق.","لا تخضع لإضافات."],correct:3},
+{text:"وفق المرسوم التشريعي /102/ تاريخ 19/06/2025 وتعليماته المعتمدة ابتداء من تاريخ 01/08/2025 ان الحد الأدنى المعفى من ضريبة الرواتب والأجور هو:",options:["250,000 ل.س.","279,000 ل.س.","837,000 ل.س."],correct:1},
+{text:"وفق المرسوم التشريعي /30/ والمرسوم التشريعي /102/ يحدد معدل ضريبة الرواتب والأجور التي تخضع له شريحة الدخل الصافي الشهري البالغة /875,000/ ل.س بنسبة:",options:["9 % من الدخل المذكور بعد تنزيل الحد الأدنى المعفى.","11 % من الدخل المذكور بعد تنزيل الحد الأدنى المعفى.","13 % من الدخل المذكور بعد تنزيل الحد الأدنى المعفى."],correct:1},
+{text:"وفق المرسوم التشريعي /30/ تبلغ نسبة ضريبة الدخل على الرواتب والأجور عن جزء الدخل الصافي الشهري الذي يزيد عن /1,100,000/ ل.س:",options:["11%.","13%.","15%."],correct:2},
+{text:"وفق المرسوم التشريعي /30/ تخضع الرواتب والأجور في المنشآت السياحية ل:",options:["نسبة 0.5%.","الشرائح التصاعدية.","نسبة 1%."],correct:1},
+{text:"وفق المرسوم التشريعي /30/ يبلغ تعويض التمثيل:",options:["20% من الراتب المقطوع على ألا يتجاوز مبلغ /200,000/ ل.س.","25% من الراتب المقطوع على ألا يتجاوز مبلغ /200,000/ ل.س.","25% من الراتب الخاضع للضريبة على ألا يتجاوز مبلغ /100,000/ ل.س."],correct:1},
+{text:"وفق المرسوم التشريعي /30/ تبلغ نسبة ضريبة الدخل على الرواتب والأجور عن الدفعة المقطوعة:",options:["5%.","10%.","15%."],correct:0},
+{text:"وفق المرسوم التشريعي /30/ إذا قدم صاحب العمل بيانات غير صحيحة أو غير كاملة عن مقدار رواتب المستخدمين لديه يعاقب بغرامة تعادل:",options:["10 % من الضريبة عن الجزء المكتوم.","50 % من الضريبة عن الجزء المكتوم.","100 % من الضريبة عن الجزء المكتوم."],correct:2},
+{text:"وفق المرسوم التشريعي /30/ على صاحب العمل أن يسدد للخزينة العامة المبالغ المقتطعة من رواتب وأجور عماله (ضريبة الرواتب والأجور) خلال:",options:["عشرة أيام من تاريخ انقضاء كل ثلاثة أشهر.","خمسة عشر يوماً من تاريخ انقضاء كل ثلاثة أشهر.","ثلاثون يوماً من تاريخ انقضاء كل ثلاثة أشهر."],correct:1},
+{text:"يقدم بيان ضريبة الرواتب والأجور وتسدد الضريبة عن الدورة الأولى وفق المرسوم التشريعي رقم /30/ خلال الفترة:",options:["من 1/7 لغاية 15/7.","من 1/4 لغاية 15/04.","من 1/1 لغاية 15/01."],correct:1},
+{text:"وفق المرسوم التشريعي رقم /30/ تجبر الضرائب والرسوم على اختلافها وأية أعباء مالية على المكلفين إلى أقرب:",options:["/10/ ليرات سورية الأعلى.","/100/ ليرة سورية الأعلى.","/100/ ليرة سورية الأدنى."],correct:1},
+{text:"تقاضى أحد المدراء راتب شهر تموز مبلغ /1,200,000/ ل.س وهو مشترك بالتأمينات الاجتماعية. ويتقاضى تعويض تمثيل شهري مبلغ /300,000/ ل.س علماً ان نظام الشركة يسمح بمنح مثل هذا التعويض وتعويض غلاء معيشي /50,000/ ل.س وعليه تبلغ الضريبة المتوجب اقتطاعها من راتبه الشهري مبلغ:",options:["/101,500/ ليرة سورية.","/58,900/ ليرة سورية.","/71,500/ ليرة سورية."],correct:1},
+{text:"سامر موظف في شركة تقاضى راتب شهر أيلول لعام 2025 مقداره /1,000,000/ ليرة سورية وهو مشترك بالتأمينات الاجتماعية وبالتالي فإن ضريبة الرواتب والأجور الشهرية وفق المرسوم التشريعي رقم /102/ هي:",options:["/21,000/ ليرة سورية.","/11,900/ ليرة سورية.","/34,000/ ليرة سورية."],correct:1},
+{text:"سعيد موظف في شركة محدودة المسؤولية كان راتبه الشهري المقطوع والتعويضات بشهر أيلول لعام 2025 كالتالي (علماً انه مشترك في التأمينات الاجتماعية)، /1,200,000/ ل.س الراتب المقطوع، /200,000/ ل.س تعويض عائلي، /100,000/ ل.س تعويض مسؤولية، /300,000/ ل.س تعويض غلاء معيشة، /200,000/ ل.س تعويض تمثيل علماً أن نظام الشركة يسمح بمنح مثل هذا التعويض، /500,000/ ل.س بدل اجازات غير مستخدمة دفعت مرة واحدة، وبالتالي فإن الراتب الشهري الخاضع للضريبة هو:",options:["/1,716,000/ ليرة سورية.","/1,200,000/ ليرة سورية.","/2,000,000/ ليرة سورية"],correct:0},
+{text:"وفق المعطيات الواردة في المثال السابق فإن الدفعة الشهرية الخاضعة لضريبة الدفعة المقطوعة هي:",options:["/500,000/ ليرة سورية.","/200,000/ ليرة سورية.","/300,000/ ليرة سورية"],correct:0},
+{text:"وفق المعطيات الواردة في المثال السابق فإن ضريبة الرواتب والأجور الشهرية هي:",options:["/126,400/ ليرة سورية.","/151,400/ ليرة سورية.","/25,000/ ليرة سورية."],correct:0},
+{text:"وفق المعطيات الواردة في المثال السابق فإن ضريبة الدفعة المقطوعة الشهرية هي:",options:["/10,000/ ليرة سورية.","/25,000/ ليرة سورية.","/15,000/ ليرة سورية."],correct:1},
+{text:"وفق المعطيات الواردة في المثال السابق فإن اجمالي الضريبة الشهرية (ضريبة رواتب وأجور + ضريبة دفعة مقطوعة) هي:",options:["/136,400/ ليرة سورية.","/151,400/ ليرة سورية.","/166,400/ ليرة سورية."],correct:1},
+{text:"سعيد موظف في شركة محدودة المسؤولية كان راتبه الشهري المقطوع والتعويضات (بالليرة الجديدة السورية) بشهر شباط لعام 2026 كالتالي (علماً انه مشترك في التأمينات الاجتماعية)، /12,000/ ل.س الراتب المقطوع، /2,000/ ل.س تعويض عائلي، /1,000/ ل.س تعويض مسؤولية، /3,000/ ل.س تعويض غلاء معيشة، /2,000/ ل.س تعويض تمثيل علماً أن نظام الشركة يسمح بمنح مثل هذا التعويض، /5,000/ ل.س بدل اجازات غير مستخدمة دفعت مرة واحدة وعليه فإن الراتب الشهري الخاضع للضريبة هو:",options:["/12,000/ ليرة سورية.","/17,160/ ليرة سورية.","/17,000/ ليرة سورية"],correct:1},
+{text:"وفق المعطيات الواردة في المثال السابق فإن الدفعة الشهرية الخاضعة لضريبة الدفعة المقطوعة هي:",options:["/5,000/ ليرة سورية.","/2,000/ ليرة سورية.","/3,000/ ليرة سورية."],correct:0},
+{text:"وفق المعطيات الواردة في المثال السابق فإن ضريبة الرواتب والأجور الشهرية هي:",options:["/1,264/ ليرة سورية.","/1,514/ ليرة سورية.","/250/ ليرة سورية."],correct:0},
+{text:"وفق المعطيات الواردة في المثال السابق فإن ضريبة الدفعة المقطوعة الشهرية هي:",options:["/100/ ليرة سورية.","/250/ ليرة سورية.","/150/ ليرة سورية."],correct:1},
+{text:"وفق المعطيات الواردة في المثال السابق فإن اجمالي الضريبة الشهرية (ضريبة رواتب وأجور + ضريبة دفعة مقطوعة) هي:",options:["/1,364/ ليرة سورية.","/1,514/ ليرة سورية.","/1,664/ ليرة سورية."],correct:1},
+{text:"وفق المرسوم التشريعي /67/ تاريخ 18/03/2026 المعتمد ابتداء من تاريخ 01/05/2026 والمطبق في 01 حزيران 2026 ان الحد الأدنى المعفى من ضريبة الرواتب والأجور هو:",options:["2,790 ل.س.","8,370 ل.س.","12,560 ل.س."],correct:2},
+{text:"سامر موظف في شركة تقاضى راتب شهر حزيران عن عام 2026 مقداره /20,000/ ليرة جديدة سورية، ووفق المرسوم التشريعي رقم /68/ وفي حال كان غير مشترك بالتأمينات الاجتماعية فإن الراتب الخاضع للضريبة هو:",options:["6,040 ل.س.","18,600 ل.س.","7,440 ل.س."],correct:2},
+{text:"وفق المعطيات الواردة في المثال السابق فإن ضريبة الرواتب والأجور هي:",options:["1,000 ل.س.","2,790 ل.س.","1,116 ل.س."],correct:2}
+];
+
+var total=QUESTIONS.length,current=0,answers=[],checked=[],started=false,done=false,app=document.getElementById('app');
+for(var i=0;i<total;i++){answers[i]=null;checked[i]=false;}
+function letter(i){var l=['أ','ب','ج','د'];return l[i]||'';}
+function countChecked(){var c=0;for(var i=0;i<checked.length;i++){if(checked[i])c++;}return c;}
+function startScreen(){
+var h='<div class="title">حالات عملية - ضريبة الرواتب والأجور</div><div class="sub">القانون رقم /24/ لعام 2003 وتعديلاته</div><div class="preptext">اختبار تفاعلي — الدورة التحضيرية لفحص المحاسب القانوني</div><div class="prep">إعداد المحاسب القانوني<br>ماهر وهبي</div><div class="count">📚 عدد الأسئلة: '+total+' سؤالاً</div><div class="disc">⚠️ تنبيه: هذه الأسئلة نماذج استرشادية للاستئناس فقط<br>يرجى الرجوع إلى النصوص القانونية الواردة عند الدراسة</div><button class="startbtn" onclick="started=true;showQ();">▶ ابدأ الاختبار</button>';
+app.innerHTML=h;
+}
+function showQ(){
+if(!started){startScreen();return;}
+if(done){showResult();return;}
+var q=QUESTIONS[current],isCh=checked[current],sel=answers[current];
+var h='<div class="prep" style="border-top:none;padding-top:0;margin-top:0;">إعداد المحاسب القانوني: ماهر وهبي</div><div class="progress"><span class="qcounter">السؤال '+(current+1)+' من '+total+'</span><span class="qscore">✅ تم الإجابة: '+countChecked()+'/'+total+'</span></div><div class="qtext">'+q.text+'</div><ul class="options">';
+for(var i=0;i<q.options.length;i++){
+var cls='opt';
+if(isCh){
+if(i===q.correct)cls+=' correct';
+if(sel===i && i!==q.correct)cls+=' wrong';
+cls+=' disabled';
+}
+var pe=isCh?'pointer-events:none;':'';
+h+='<li class="'+cls+'" data-idx="'+i+'" style="'+pe+'"><span class="prefix">'+letter(i)+'</span><span>'+q.options[i]+'</span></li>';
+}
+h+='</ul>';
+if(isCh){
+var fc=(sel===q.correct)?'fbgood':'fbbad';
+var ft=(sel===q.correct)?'✅ إجابتك صحيحة! ✓':'❌ إجابتك خاطئة.<br> الإجابة الصحيحة هي: '+letter(q.correct);
+h+='<div class="feedback '+fc+'">'+ft+'</div>';
+}else{h+='<div class="feedback" style="display:none;"></div>';}
+var isLast=(current===total-1);
+var nextBtn=isLast?'<div class="nav submit" onclick="finish()">✍️ إنهاء</div>':'<div class="nav next" onclick="goNext()">التالي ▶</div>';
+h+='<div class="actions"><div class="nav" onclick="goPrev()">◀ السابق</div>'+nextBtn+'</div>';
+app.innerHTML=h;
+if(!isCh){
+var opts=document.querySelectorAll('.opt');
+for(var j=0;j<opts.length;j++){
+(function(el){
+el.onclick=function(){
+var idx=parseInt(el.dataset.idx);
+if(!isNaN(idx) && !checked[current]){
+answers[current]=idx;
+checked[current]=true;
+showQ();
+}
+};
+})(opts[j]);
+}
+}
+}
+function goPrev(){if(current>0){current--;showQ();}}
+function goNext(){if(current<total-1){current++;showQ();}}
+function finish(){var rem=total-countChecked();if(rem>0 && !confirm('لديك '+rem+' سؤالاً لم يتم الإجابة عليه. هل تريد إنهاء الاختبار؟'))return;done=true;showResult();}
+function showResult(){
+var s=0;for(var i=0;i<total;i++){if(answers[i]!==null && answers[i]===QUESTIONS[i].correct)s++;}
+var pct=Math.round((s/total)*100);
+var msg='';if(pct>=80)msg='🎉 ممتاز! أداء رائع 🎉';else if(pct>=60)msg='👍 جيد جداً، يمكنك التحسن أكثر 👍';else if(pct>=40)msg='📚 جيد، حاول مراجعة المعلومات 📚';else msg='💪 لا تقلق، تعلم من أخطائك وحاول مجدداً 💪';
+var h='<div class="result-title">🏆 نتيجة الاختبار 🏆</div><div class="prep">إعداد المحاسب القانوني: ماهر وهبي</div><div class="final-score">'+s+' / '+total+'</div><div class="final-msg">'+msg+'</div><div style="text-align:center;margin:10px 0;"><span class="qscore" style="background:#0a2a4a;padding:6px 18px;border-radius:12px;">النسبة: '+pct+'%</span></div><button class="btn-restart" onclick="location.reload()">🔄 إعادة الاختبار من البداية</button><div class="footer-disc">⚠️ تنبيه: الأسئلة أعلاه هي نماذج استرشادية للاستئناس فقط.<br>يرجى الرجوع إلى النصوص القانونية الواردة عند الدراسة.</div>';
+app.innerHTML=h;
+}
+startScreen();
+</script>
+</body>
+</html>
